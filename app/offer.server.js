@@ -30,8 +30,6 @@ export async function getOffer(accessToken, shopName) {
     variantQuery,
   );
 
-  console.log({ variantResponse });
-
   if (!variantResponse?.data?.productVariants?.edges?.length) {
     throw new Error("No product variants found.");
   }
@@ -50,7 +48,8 @@ export async function getOffer(accessToken, shopName) {
     productTitle: variantNode.product.title,
     productImageURL:
       variantNode.product.featuredMedia?.preview?.image?.url || "",
-    productDescription: variantNode.product.description || "",
+    productDescription:
+      variantNode.product.description || "some random description",
     originalPrice: variantNode.price,
     discountedPrice: variantNode.price,
     changes: [

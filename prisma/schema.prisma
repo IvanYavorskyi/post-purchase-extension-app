@@ -15,7 +15,7 @@ datasource db {
 
 model Session {
   id            String    @id
-  shop          String
+  shop          String    @unique
   state         String
   isOnline      Boolean   @default(false)
   scope         String?

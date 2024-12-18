@@ -1,10 +1,15 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "406becb10283a48edfb5eee4f25e749f"
-application_url = "https://beta-bring-cement-expanding.trycloudflare.com"
+application_url = "https://singh-mirror-wrote-infant.trycloudflare.com"
 embedded = true
 name = "post-checkout-ext"
 handle = "post-checkout-ext-2"
+
+[build]
+automatically_update_urls_on_dev = true
+dev_store_url = "post-purchase-extension-test-v2-0.myshopify.com"
+include_config_on_deploy = true
 
 [webhooks]
 api_version = "2024-10"
@@ -15,26 +20,14 @@ api_version = "2024-10"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = """
-read_products, 
-write_products, 
-read_checkouts, 
-write_checkouts, 
-read_orders, 
-write_orders
-"""
+scopes = "read_checkouts,read_orders,read_products,write_checkouts,write_orders,write_products"
 
 [auth]
 redirect_urls = [
-  "https://beta-bring-cement-expanding.trycloudflare.com/auth/callback",
-  "https://beta-bring-cement-expanding.trycloudflare.com/auth/shopify/callback",
-  "https://beta-bring-cement-expanding.trycloudflare.com/api/auth/callback"
+  "https://singh-mirror-wrote-infant.trycloudflare.com/auth/callback",
+  "https://singh-mirror-wrote-infant.trycloudflare.com/auth/shopify/callback",
+  "https://singh-mirror-wrote-infant.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
 embedded = false
-
-[build]
-dev_store_url = "post-purchase-store-ivan.myshopify.com"
-automatically_update_urls_on_dev = true
-include_config_on_deploy = true

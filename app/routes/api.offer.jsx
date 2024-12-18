@@ -19,7 +19,11 @@ export const action = async ({ request }) => {
     select: { accessToken: true },
   });
 
-  console.log({ shop, sessionToken, accessToken: session.accessToken });
-  const offer = getOffer(session.accessToken, shop);
-  return cors(json({ offer }));
+  const offer = await getOffer(session.accessToken, shop);
+
+  return cors(
+    json({
+      offer,
+    }),
+  );
 };

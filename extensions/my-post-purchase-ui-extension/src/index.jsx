@@ -17,7 +17,7 @@ import {
 } from "@shopify/post-purchase-ui-extensions-react";
 
 // For local development, replace APP_URL with your local tunnel URL.
-const APP_URL = "https://beta-bring-cement-expanding.trycloudflare.com";
+const APP_URL = "https://singh-mirror-wrote-infant.trycloudflare.com";
 
 // Preload data from your app server to ensure that the extension loads quickly.
 extend(
@@ -50,6 +50,23 @@ export function App() {
     useExtensionInput();
   const [loading, setLoading] = useState(true);
   const [calculatedPurchase, setCalculatedPurchase] = useState();
+  const [quantity, setQuantity] = useState(1);
+  const [selectedSize, setSelectedSize] = useState("");
+
+  const handleQuantityChange = (e) => setQuantity(Number(e.target.value));
+  const handleSizeChange = (e) => setSelectedSize(e.target.value);
+
+  const handleAddToCart = () => {
+    console.log({
+      product: offer.productTitle,
+      size: selectedSize,
+      quantity,
+    });
+    done();
+  };
+
+  const currencyCode =
+    inputData.initialPurchase?.totalPriceSet?.presentmentMoney?.currencyCode;
 
   const { offer } = storage.initialData;
 
@@ -115,6 +132,10 @@ export function App() {
     done();
   }
 
+  const handleTimerComplete = () => {
+    done();
+  };
+
   return (
     <BlockStack spacing="loose">
       <CalloutBanner>
@@ -124,6 +145,12 @@ export function App() {
               It&#39;s not too late to add this to your order
             </Text>
           </TextContainer>
+
+          <CountdownTimer
+            initialTime={36000}
+            onComplete={handleTimerComplete}
+          />
+
           <TextContainer>
             <Text size="medium">
               Add the {purchaseOption.productTitle} to your order and{" "}
@@ -151,32 +178,40 @@ export function App() {
           <PriceHeader
             discountedPrice={discountedPrice}
             originalPrice={originalPrice}
+            currency={currencyCode}
             loading={!calculatedPurchase}
           />
-          <ProductDescription textLines={purchaseOption.productDescription} />
+          <ProductDescription description={purchaseOption.productDescription} />
           <BlockStack spacing="tight">
             <Separator />
             <MoneyLine
               label="Subtotal"
               amount={discountedPrice}
+              currency={currencyCode}
               loading={!calculatedPurchase}
             />
             <MoneyLine
               label="Shipping"
               amount={shipping}
+              currency={currencyCode}
               loading={!calculatedPurchase}
             />
             <MoneyLine
               label="Taxes"
               amount={taxes}
+              currency={currencyCode}
               loading={!calculatedPurchase}
             />
             <Separator />
-            <MoneySummary label="Total" amount={total} />
+            <MoneySummary
+              label="Total"
+              amount={total}
+              currency={currencyCode}
+            />
           </BlockStack>
           <BlockStack>
             <Button onPress={acceptOffer} submit loading={loading}>
-              Pay now · {formatCurrency(total)}
+              Pay now · {formatCurrency(total, currencyCode)}
             </Button>
             <Button onPress={declineOffer} subdued loading={loading}>
               Decline this offer
@@ -188,46 +223,42 @@ export function App() {
   );
 }
 
-function PriceHeader({ discountedPrice, originalPrice, loading }) {
+function PriceHeader({ discountedPrice, originalPrice, currency, loading }) {
   return (
     <TextContainer alignment="leading" spacing="loose">
       <Text role="deletion" size="large">
-        {!loading && formatCurrency(originalPrice)}
+        {!loading && formatCurrency(originalPrice, currency)}
       </Text>
       <Text emphasized size="large" appearance="critical">
         {" "}
-        {!loading && formatCurrency(discountedPrice)}
+        {!loading && formatCurrency(discountedPrice, currency)}
       </Text>
     </TextContainer>
   );
 }
 
-function ProductDescription({ textLines }) {
+function ProductDescription({ description }) {
   return (
     <BlockStack spacing="xtight">
-      {textLines.map((text, index) => (
-        <TextBlock key={index} subdued>
-          {text}
-        </TextBlock>
-      ))}
+      <TextBlock subdued>{description}</TextBlock>
     </BlockStack>
   );
 }
 
-function MoneyLine({ label, amount, loading = false }) {
+function MoneyLine({ label, amount, currency, loading = false }) {
   return (
     <Tiles>
       <TextBlock size="small">{label}</TextBlock>
       <TextContainer alignment="trailing">
         <TextBlock emphasized size="small">
-          {loading ? "-" : formatCurrency(amount)}
+          {loading ? "-" : formatCurrency(amount, currency)}
         </TextBlock>
       </TextContainer>
     </Tiles>
   );
 }
 
-function MoneySummary({ label, amount }) {
+function MoneySummary({ label, amount, currency }) {
   return (
     <Tiles>
       <TextBlock size="medium" emphasized>
@@ -235,16 +266,59 @@ function MoneySummary({ label, amount }) {
       </TextBlock>
       <TextContainer alignment="trailing">
         <TextBlock emphasized size="medium">
-          {formatCurrency(amount)}
+          {formatCurrency(amount, currency)}
         </TextBlock>
       </TextContainer>
     </Tiles>
   );
 }
 
-function formatCurrency(amount) {
-  if (!amount || parseInt(amount, 10) === 0) {
+function formatCurrency(amount, currency = "USD") {
+  if (!amount || parseFloat(amount) === 0) {
     return "Free";
   }
-  return `$${amount}`;
+
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency,
+    currencyDisplay: "symbol",
+  }).format(amount);
+}
+
+function CountdownTimer({ initialTime, onComplete }) {
+  const [timeLeft, setTimeLeft] = useState(initialTime);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          onComplete();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [onComplete]);
+
+  const days = Math.floor(timeLeft / (60 * 60 * 24));
+  const hours = Math.floor((timeLeft % (60 * 60 * 24)) / (60 * 60));
+  const minutes = Math.floor((timeLeft % (60 * 60)) / 60);
+  const seconds = timeLeft % 60;
+
+  return (
+    <TextContainer>
+      <Text size="medium" emphasized>
+        Special Offer Ends In:{" "}
+      </Text>
+      <Text size="large" appearance="critical">
+        {days > 0 && `${days}d `}
+        {hours.toString().padStart(2, "0")}h:
+        {minutes.toString().padStart(2, "0")}m:
+        {seconds.toString().padStart(2, "0")}s
+      </Text>
+    </TextContainer>
+  );
 }
