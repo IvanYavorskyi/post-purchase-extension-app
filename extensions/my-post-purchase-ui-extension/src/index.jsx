@@ -17,7 +17,7 @@ import {
 } from "@shopify/post-purchase-ui-extensions-react";
 
 // For local development, replace APP_URL with your local tunnel URL.
-const APP_URL = "https://nepal-gc-cooling-true.trycloudflare.com/extensions/dev-console";
+const APP_URL = "https://beta-bring-cement-expanding.trycloudflare.com";
 
 // Preload data from your app server to ensure that the extension loads quickly.
 extend(
@@ -34,11 +34,13 @@ extend(
       }),
     }).then((response) => response.json());
 
+    // TODO console postpurchase.offer
+    // change quantity from state. will be 1 by default.
     await storage.update(postPurchaseOffer);
 
     // For local development, always show the post-purchase page
     return { render: true };
-  }
+  },
 );
 
 render("Checkout::PostPurchase::Render", () => <App />);
@@ -49,9 +51,9 @@ export function App() {
   const [loading, setLoading] = useState(true);
   const [calculatedPurchase, setCalculatedPurchase] = useState();
 
-  const { offers } = storage.initialData;
+  const { offer } = storage.initialData;
 
-  const purchaseOption = offers[0];
+  const purchaseOption = offer;
 
   // Define the changes that you want to make to the purchase, including the discount to the product.
   useEffect(() => {

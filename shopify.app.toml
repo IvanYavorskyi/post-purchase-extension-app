@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "406becb10283a48edfb5eee4f25e749f"
-application_url = "https://qualities-craps-minneapolis-terrorism.trycloudflare.com"
+application_url = "https://beta-bring-cement-expanding.trycloudflare.com"
 embedded = true
 name = "post-checkout-ext"
 handle = "post-checkout-ext-2"
@@ -15,13 +15,20 @@ api_version = "2024-10"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "write_products"
+scopes = """
+read_products, 
+write_products, 
+read_checkouts, 
+write_checkouts, 
+read_orders, 
+write_orders
+"""
 
 [auth]
 redirect_urls = [
-  "https://qualities-craps-minneapolis-terrorism.trycloudflare.com/auth/callback",
-  "https://qualities-craps-minneapolis-terrorism.trycloudflare.com/auth/shopify/callback",
-  "https://qualities-craps-minneapolis-terrorism.trycloudflare.com/api/auth/callback"
+  "https://beta-bring-cement-expanding.trycloudflare.com/auth/callback",
+  "https://beta-bring-cement-expanding.trycloudflare.com/auth/shopify/callback",
+  "https://beta-bring-cement-expanding.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
@@ -30,3 +37,4 @@ embedded = false
 [build]
 dev_store_url = "post-purchase-store-ivan.myshopify.com"
 automatically_update_urls_on_dev = true
+include_config_on_deploy = true

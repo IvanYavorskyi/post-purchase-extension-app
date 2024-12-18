@@ -1,39 +1,87 @@
-const OFFERS = [
-  {
-    id: "gid://shopify/Product/9030540132584",
-    legacyResourceId: "9030540132584",
-    title: "t-short",
-    featuredImage: null,
-    description: "desc",
-    variants: {
-      edges: [
-        {
-          node: {
-            price: "123.00",
-            compareAtPrice: null,
-            id: "gid://shopify/ProductVariant/46911531614440",
-            legacyResourceId: "46911531614440",
-          },
-        },
-      ],
-    },
-  },
-];
+export async function getOffer(accessToken, shopName) {
+  const variantQuery = `
+      query {
+          productVariants(first: 10) {
+              edges {
+                  node {
+                      product {
+                          featuredMedia {
+                              preview {
+                                  image {
+                                      url
+                                  }
+                              }
+                          }
+                          title
+                          description
+                      }
+                      title
+                      price
+                      id
+                  }
+              }
+          }
+      }
+  `;
 
-/*
- * For testing purposes, product information is hardcoded.
- * In a production application, replace this function with logic to determine
- * what product to offer to the customer.
- */
-export function getOffers() {
-  return OFFERS;
+  const variantResponse = await fetchGraphQL(
+    accessToken,
+    shopName,
+    variantQuery,
+  );
+
+  console.log({ variantResponse });
+
+  if (!variantResponse?.data?.productVariants?.edges?.length) {
+    throw new Error("No product variants found.");
+  }
+
+  const randomIndex = Math.floor(
+    Math.random() * variantResponse.data.productVariants.edges.length,
+  );
+  const variantNode =
+    variantResponse.data.productVariants.edges[randomIndex].node;
+
+  const variantID = variantNode.id.split("/")[4];
+
+  const offer = {
+    id: 1,
+    title: "One time offer",
+    productTitle: variantNode.product.title,
+    productImageURL:
+      variantNode.product.featuredMedia?.preview?.image?.url || "",
+    productDescription: variantNode.product.description || "",
+    originalPrice: variantNode.price,
+    discountedPrice: variantNode.price,
+    changes: [
+      {
+        type: "add_variant",
+        variantID: variantID,
+        quantity: 1,
+        discount: {
+          value: 15,
+          valueType: "percentage",
+          title: "15% off",
+        },
+      },
+      { type: "add_shipping_line", price: 10 },
+    ],
+  };
+
+  return offer;
 }
 
-/*
- * Retrieve discount information for the specific order on the backend instead of relying
- * on the discount information that is sent from the frontend.
- * This is to ensure that the discount information is not tampered with.
- */
-export function getSelectedOffer(offerId) {
-  return OFFERS.find((offer) => offer.id === offerId);
+async function fetchGraphQL(accessToken, shopName, query) {
+  const response = await fetch(
+    `https://${shopName}/admin/api/2024-10/graphql.json`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Access-Token": accessToken,
+      },
+      body: JSON.stringify({ query }),
+    },
+  );
+  return response.json();
 }
