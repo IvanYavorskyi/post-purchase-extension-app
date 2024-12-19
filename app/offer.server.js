@@ -43,7 +43,7 @@ export async function getOffer(accessToken, shopName) {
   const variantID = variantNode.id.split("/")[4];
 
   const offer = {
-    id: 1,
+    id: parseInt(variantID, 10),
     title: "One time offer",
     productTitle: variantNode.product.title,
     productImageURL:
@@ -83,4 +83,64 @@ async function fetchGraphQL(accessToken, shopName, query) {
     },
   );
   return response.json();
+}
+
+export async function getSelectedOffer(offerId, accessToken, shopName) {
+  try {
+    const query = `
+      query {
+        productVariant(id: "gid://shopify/ProductVariant/${offerId}") {
+          id
+          title
+          price
+          product {
+            title
+            description
+            featuredMedia {
+              preview {
+                image {
+                  url
+                }
+              }
+            }
+          }
+        }
+      }
+    `;
+
+    const response = await fetchGraphQL(accessToken, shopName, query);
+
+    if (!response?.data?.productVariant) {
+      return null;
+    }
+
+    const product = response.data.productVariant;
+
+    return {
+      id: parseInt(product.id.split("/").pop(), 10),
+      title: "One time offer",
+      productTitle: product.product.title,
+      productImageURL: product.product.featuredMedia?.preview?.image?.url || "",
+      productDescription: [
+        product.product.description || "No description available",
+      ],
+      originalPrice: product.price,
+      discountedPrice: (product.price * 0.85).toFixed(2), // Assuming 15% off
+      changes: [
+        {
+          type: "add_variant",
+          variantID: parseInt(product.id.split("/").pop(), 10),
+          quantity: 1,
+          discount: {
+            value: 15,
+            valueType: "percentage",
+            title: "15% off",
+          },
+        },
+      ],
+    };
+  } catch (error) {
+    console.error("Error fetching selected offer:", error);
+    return null;
+  }
 }

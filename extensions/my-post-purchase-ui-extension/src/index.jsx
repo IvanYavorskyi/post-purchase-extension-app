@@ -14,10 +14,12 @@ import {
   Tiles,
   TextBlock,
   Layout,
+  Select,
+  InlineStack,
 } from "@shopify/post-purchase-ui-extensions-react";
 
 // For local development, replace APP_URL with your local tunnel URL.
-const APP_URL = "https://singh-mirror-wrote-infant.trycloudflare.com";
+const APP_URL = "https://average-sorts-developments-mat.trycloudflare.com";
 
 // Preload data from your app server to ensure that the extension loads quickly.
 extend(
@@ -53,18 +55,6 @@ export function App() {
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState("");
 
-  const handleQuantityChange = (e) => setQuantity(Number(e.target.value));
-  const handleSizeChange = (e) => setSelectedSize(e.target.value);
-
-  const handleAddToCart = () => {
-    console.log({
-      product: offer.productTitle,
-      size: selectedSize,
-      quantity,
-    });
-    done();
-  };
-
   const currencyCode =
     inputData.initialPurchase?.totalPriceSet?.presentmentMoney?.currencyCode;
 
@@ -93,7 +83,9 @@ export function App() {
       ?.amount;
   const taxes =
     calculatedPurchase?.addedTaxLines[0]?.priceSet?.presentmentMoney?.amount;
-  const total = calculatedPurchase?.totalOutstandingSet.presentmentMoney.amount;
+  const total =
+    calculatedPurchase?.totalOutstandingSet.presentmentMoney.amount *
+      quantity || 1;
   const discountedPrice =
     calculatedPurchase?.updatedLineItems[0].totalPriceSet.presentmentMoney
       .amount;
@@ -139,28 +131,24 @@ export function App() {
   return (
     <BlockStack spacing="loose">
       <CalloutBanner>
-        <BlockStack spacing="tight">
-          <TextContainer>
-            <Text size="medium" emphasized>
-              It&#39;s not too late to add this to your order
-            </Text>
-          </TextContainer>
+        <TextContainer>
+          <Text size="medium" emphasized>
+            It&#39;s not too late to add this to your order
+          </Text>
+        </TextContainer>
 
-          <CountdownTimer
-            initialTime={36000}
-            onComplete={handleTimerComplete}
-          />
+        <CountdownTimer initialTime={36000} onComplete={handleTimerComplete} />
 
-          <TextContainer>
-            <Text size="medium">
-              Add the {purchaseOption.productTitle} to your order and{" "}
-            </Text>
-            <Text size="medium" emphasized>
-              {purchaseOption.changes[0].discount.title}
-            </Text>
-          </TextContainer>
-        </BlockStack>
+        <TextContainer>
+          <Text size="medium">
+            Add the {purchaseOption.productTitle} to your order and{" "}
+          </Text>
+          <Text size="medium" emphasized>
+            {purchaseOption.changes[0].discount.title}
+          </Text>
+        </TextContainer>
       </CalloutBanner>
+
       <Layout
         media={[
           { viewportSize: "small", sizes: [1, 0, 1], maxInlineSize: 0.9 },
@@ -169,19 +157,22 @@ export function App() {
         ]}
       >
         <Image
-          description="product photo"
+          description="Product photo"
           source={purchaseOption.productImageURL}
         />
-        <BlockStack />
-        <BlockStack>
+
+        <BlockStack spacing="loose">
           <Heading>{purchaseOption.productTitle}</Heading>
+
           <PriceHeader
             discountedPrice={discountedPrice}
             originalPrice={originalPrice}
             currency={currencyCode}
             loading={!calculatedPurchase}
           />
+
           <ProductDescription description={purchaseOption.productDescription} />
+
           <BlockStack spacing="tight">
             <Separator />
             <MoneyLine
@@ -209,14 +200,56 @@ export function App() {
               currency={currencyCode}
             />
           </BlockStack>
-          <BlockStack>
+
+          {/* Quantity Selection */}
+          <TextContainer>
+            <Text size="medium" emphasized>
+              Quantity:
+            </Text>
+            <Select
+              label="Quantity"
+              value={quantity}
+              onChange={setQuantity} // Direct state update
+              options={[
+                { label: "1", value: "1" },
+                { label: "2", value: "2" },
+                { label: "3", value: "3" },
+                { label: "4", value: "4" },
+                { label: "5", value: "5" },
+              ]}
+            />
+          </TextContainer>
+
+          {/* TODO size selection */}
+          {/* {purchaseOption.productOptions?.length > 0 && (
+              <TextContainer>
+                <Text size="medium" emphasized>
+                  Select Size:
+                </Text>
+                <Select
+                  label="Size"
+                  value={selectedSize}
+                  onChange={setSelectedSize} // Direct state update
+                  options={[
+                    { label: "Choose size", value: "", disabled: true },
+                    ...purchaseOption.productOptions[0].values.map((size) => ({
+                      label: size,
+                      value: size,
+                    })),
+                  ]}
+                />
+              </TextContainer>
+            )} */}
+
+          {/* Action Buttons */}
+          <InlineStack>
             <Button onPress={acceptOffer} submit loading={loading}>
               Pay now · {formatCurrency(total, currencyCode)}
             </Button>
             <Button onPress={declineOffer} subdued loading={loading}>
               Decline this offer
             </Button>
-          </BlockStack>
+          </InlineStack>
         </BlockStack>
       </Layout>
     </BlockStack>

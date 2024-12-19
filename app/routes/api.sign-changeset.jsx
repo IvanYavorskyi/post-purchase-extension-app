@@ -2,6 +2,7 @@ import { json } from "@remix-run/node";
 import { v4 as uuidv4 } from "uuid";
 import jwt from "jsonwebtoken";
 
+import db from "../db.server";
 import { authenticate } from "../shopify.server";
 import { getSelectedOffer } from "../offer.server";
 
@@ -12,11 +13,21 @@ export const loader = async ({ request }) => {
 
 // The action responds to the POST request from the extension. Make sure to use the cors helper for the request to work.
 export const action = async ({ request }) => {
-  const { cors } = await authenticate.public.checkout(request);
+  const { cors, sessionToken } = await authenticate.public.checkout(request);
+
+  const shop = sessionToken.input_data.shop.domain;
+  const session = await db.session.findFirst({
+    where: { shop: shop },
+    select: { accessToken: true },
+  });
 
   const body = await request.json();
 
-  const selectedOffer = getSelectedOffer(body.changes);
+  const selectedOffer = await getSelectedOffer(
+    body.changes,
+    session.accessToken,
+    shop,
+  );
 
   const payload = {
     iss: process.env.SHOPIFY_API_KEY,
