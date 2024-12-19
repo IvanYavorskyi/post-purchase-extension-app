@@ -159,24 +159,37 @@ export function App() {
   };
 
   return (
-    <BlockStack spacing="loose">
+    <BlockStack
+      spacing="loose"
+      style={{
+        backgroundColor: "#f9f9f9",
+        padding: "20px",
+        borderRadius: "8px",
+        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+      }}
+    >
       <CalloutBanner>
-        <TextContainer>
-          <Text size="medium" emphasized>
-            It&#39;s not too late to add this to your order
-          </Text>
-        </TextContainer>
+        <BlockStack spacing="tight">
+          <TextContainer>
+            <Text size="medium" emphasized>
+              It&#39;s not too late to add this to your order
+            </Text>
+          </TextContainer>
 
-        <CountdownTimer initialTime={36000} onComplete={handleTimerComplete} />
+          <CountdownTimer
+            initialTime={36000}
+            onComplete={handleTimerComplete}
+          />
 
-        <TextContainer>
-          <Text size="medium">
-            Add the {purchaseOption.productTitle} to your order and{" "}
-          </Text>
-          <Text size="medium" emphasized>
-            {purchaseOption.changes[0].discount.title}
-          </Text>
-        </TextContainer>
+          <TextContainer>
+            <Text size="medium">
+              Add the {purchaseOption.productTitle} to your order and{" "}
+            </Text>
+            <Text size="medium" emphasized>
+              {purchaseOption.changes[0].discount.title}
+            </Text>
+          </TextContainer>
+        </BlockStack>
       </CalloutBanner>
 
       <Layout
@@ -186,12 +199,28 @@ export function App() {
           { viewportSize: "large", sizes: [560, 38, 340] },
         ]}
       >
+        {/* Product Image with Styling */}
         <Image
-          description="Product photo"
+          description="product photo"
           source={purchaseOption.productImageURL}
+          maxInlineSize="150px"
+          style={{
+            borderRadius: "8px",
+            border: "1px solid #ddd",
+          }}
         />
 
-        <BlockStack spacing="loose">
+        <BlockStack />
+
+        {/* Content Section */}
+        <BlockStack
+          spacing="loose"
+          style={{
+            width: "100%",
+            maxWidth: "800px",
+            padding: "16px",
+          }}
+        >
           <Heading>{purchaseOption.productTitle}</Heading>
 
           <PriceHeader
@@ -224,20 +253,16 @@ export function App() {
               loading={!calculatedPurchase}
             />
             <Separator />
-            <MoneySummary
-              label="Total"
-              amount={total}
-              currency={currencyCode}
-            />
+            <MoneySummary label="Total" amount={total} />
           </BlockStack>
 
           {/* Quantity Selection */}
-          <TextContainer>
+          <BlockStack spacing="tight">
             <Text size="medium" emphasized>
               Quantity:
             </Text>
 
-            <InlineStack spacing="tight" inlineAlignment="center">
+            <InlineStack spacing="extraTight" inlineAlignment="center">
               {/* Decrement Button */}
               <Button
                 disabled={quantity <= 1}
@@ -246,22 +271,31 @@ export function App() {
                 monochrome
                 accessibilityLabel="Decrease quantity"
               >
-                -
+                <TextContainer alignment="center">
+                  <Text size="large" alignment="center">
+                    -
+                  </Text>
+                </TextContainer>
               </Button>
 
               {/* Quantity Display */}
-              <BlockStack
-                spacing="none"
-                border="base"
-                padding="tight"
-                inlineAlignment="center"
+              <TextContainer
+                style={{
+                  width: "60px",
+                  height: "40px",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  border: "1px solid #ccc",
+                  borderRadius: "8px",
+                  backgroundColor: "#f9f9f9",
+                }}
                 accessibilityLabel={`Quantity: ${quantity}`}
-                width="extraSmall"
               >
                 <Text size="medium" alignment="center" emphasized>
                   {quantity}
                 </Text>
-              </BlockStack>
+              </TextContainer>
 
               {/* Increment Button */}
               <Button
@@ -270,10 +304,14 @@ export function App() {
                 monochrome
                 accessibilityLabel="Increase quantity"
               >
-                +
+                <TextContainer alignment="center">
+                  <Text size="large" alignment="center">
+                    +
+                  </Text>
+                </TextContainer>
               </Button>
             </InlineStack>
-          </TextContainer>
+          </BlockStack>
 
           {purchaseOption.sizeOptions?.length > 0 && (
             <TextContainer>
@@ -295,15 +333,14 @@ export function App() {
             </TextContainer>
           )}
 
-          {/* Action Buttons */}
-          <InlineStack>
+          <BlockStack spacing="extraLoose">
             <Button onPress={acceptOffer} submit loading={loading}>
-              Pay now · {formatCurrency(total, currencyCode)}
+              Pay now · {formatCurrency(total)}
             </Button>
             <Button onPress={declineOffer} subdued loading={loading}>
               Decline this offer
             </Button>
-          </InlineStack>
+          </BlockStack>
         </BlockStack>
       </Layout>
     </BlockStack>

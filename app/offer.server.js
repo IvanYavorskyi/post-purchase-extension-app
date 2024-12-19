@@ -31,7 +31,7 @@ export async function getOffer(accessToken, shopName) {
                               }
                             }
                           }
-                      }
+                        }
                       title
                       price
                       id
@@ -59,6 +59,99 @@ export async function getOffer(accessToken, shopName) {
 
   const variantID = variantNode.id.split("/")[4];
 
+  // TODO remove after testing
+  // const variantNode = {
+  //   id: "gid://shopify/ProductVariant/44107467751607",
+  //   title: "L",
+  //   price: "33.00",
+  //   product: {
+  //     title: "T-shirt",
+  //     description: "Description",
+  //     featuredMedia: {
+  //       preview: {
+  //         image: {
+  //           url: "https://cdn.shopify.com/s/files/1/0673/2015/2247/files/theme_cover_image.jpg?v=1734541767",
+  //         },
+  //       },
+  //     },
+  //     options: [
+  //       {
+  //         name: "Size",
+  //         values: ["S", "XS", "2XS", "M", "L"],
+  //       },
+  //     ],
+  //     variants: {
+  //       edges: [
+  //         {
+  //           node: {
+  //             id: "gid://shopify/ProductVariant/44107467620535",
+  //             title: "S",
+  //             price: "33.00",
+  //             selectedOptions: [
+  //               {
+  //                 name: "Size",
+  //                 value: "S",
+  //               },
+  //             ],
+  //           },
+  //         },
+  //         {
+  //           node: {
+  //             id: "gid://shopify/ProductVariant/44107467653303",
+  //             title: "XS",
+  //             price: "33.00",
+  //             selectedOptions: [
+  //               {
+  //                 name: "Size",
+  //                 value: "XS",
+  //               },
+  //             ],
+  //           },
+  //         },
+  //         {
+  //           node: {
+  //             id: "gid://shopify/ProductVariant/44107467686071",
+  //             title: "2XS",
+  //             price: "33.00",
+  //             selectedOptions: [
+  //               {
+  //                 name: "Size",
+  //                 value: "2XS",
+  //               },
+  //             ],
+  //           },
+  //         },
+  //         {
+  //           node: {
+  //             id: "gid://shopify/ProductVariant/44107467718839",
+  //             title: "M",
+  //             price: "33.00",
+  //             selectedOptions: [
+  //               {
+  //                 name: "Size",
+  //                 value: "M",
+  //               },
+  //             ],
+  //           },
+  //         },
+  //         {
+  //           node: {
+  //             id: "gid://shopify/ProductVariant/44107467751607",
+  //             title: "L",
+  //             price: "33.00",
+  //             selectedOptions: [
+  //               {
+  //                 name: "Size",
+  //                 value: "L",
+  //               },
+  //             ],
+  //           },
+  //         },
+  //       ],
+  //     },
+  //   },
+  // };
+  // const variantID = "44107467751607";
 
   const sizeVariants =
     variantNode.product?.variants?.edges
@@ -112,6 +205,11 @@ async function fetchGraphQL(accessToken, shopName, query) {
       body: JSON.stringify({ query }),
     },
   );
+
+  console.log({ response });
+
+  if (!response.ok) throw new Error("Fetch request failed.");
+
   return response.json();
 }
 
