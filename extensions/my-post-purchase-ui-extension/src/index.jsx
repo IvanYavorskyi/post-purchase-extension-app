@@ -85,7 +85,8 @@ export function App() {
     (calculatedPurchase?.updatedLineItems[0].totalPriceSet.presentmentMoney
       .amount || 0) * quantity;
   const originalPrice =
-    calculatedPurchase?.updatedLineItems[0].priceSet.presentmentMoney.amount;
+    (calculatedPurchase?.updatedLineItems[0].priceSet.presentmentMoney.amount ||
+      0) * quantity;
 
   function getVariantIDBySize(size) {
     const matchingOption = purchaseOption.sizeOptions.find(
@@ -122,7 +123,7 @@ export function App() {
     if (purchaseOption.includesShipping) {
       validChanges.push({
         type: "add_shipping_line",
-        price: 10,
+        price: 0,
       });
     }
 
