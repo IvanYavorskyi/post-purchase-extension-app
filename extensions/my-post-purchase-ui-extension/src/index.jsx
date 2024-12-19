@@ -68,6 +68,7 @@ export function App() {
       // Call Shopify to calculate the new price of the purchase, if the above changes are applied.
       const result = await calculateChangeset({
         changes: purchaseOption.changes,
+        quantity,
       });
 
       setCalculatedPurchase(result.calculatedPurchase);
@@ -75,7 +76,7 @@ export function App() {
     }
 
     calculatePurchase();
-  }, [calculateChangeset, purchaseOption.changes]);
+  }, [calculateChangeset, purchaseOption.changes, quantity]);
 
   // Extract values from the calculated purchase.
   const shipping =
@@ -84,8 +85,8 @@ export function App() {
   const taxes =
     calculatedPurchase?.addedTaxLines[0]?.priceSet?.presentmentMoney?.amount;
   const total =
-    calculatedPurchase?.totalOutstandingSet.presentmentMoney.amount *
-      quantity || 1;
+    (calculatedPurchase?.totalOutstandingSet.presentmentMoney.amount || 0) *
+    quantity;
   const discountedPrice =
     calculatedPurchase?.updatedLineItems[0].totalPriceSet.presentmentMoney
       .amount;
@@ -104,6 +105,7 @@ export function App() {
       },
       body: JSON.stringify({
         referenceId: inputData.initialPurchase.referenceId,
+        quantity,
         changes: purchaseOption.id,
       }),
     })
@@ -112,7 +114,7 @@ export function App() {
       .catch((e) => console.log(e));
 
     // Make a request to Shopify servers to apply the changeset.
-    await applyChangeset(token);
+    const applyChangesetResult = await applyChangeset(token);
 
     // Redirect to the thank-you page.
     done();
@@ -206,10 +208,11 @@ export function App() {
             <Text size="medium" emphasized>
               Quantity:
             </Text>
+            {/* TODO update to not use select */}
             <Select
               label="Quantity"
-              value={quantity}
-              onChange={setQuantity} // Direct state update
+              value={String(quantity)}
+              onChange={(value) => setQuantity(Number(value))}
               options={[
                 { label: "1", value: "1" },
                 { label: "2", value: "2" },
