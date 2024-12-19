@@ -87,8 +87,48 @@ export function App() {
   const originalPrice =
     calculatedPurchase?.updatedLineItems[0].priceSet.presentmentMoney.amount;
 
+  function getVariantIDBySize(size) {
+    const matchingOption = purchaseOption.sizeOptions.find(
+      (option) => option.size === size,
+    );
+    return matchingOption ? matchingOption.variantID : null;
+  }
+
   async function acceptOffer() {
     setLoading(true);
+
+    const variantID =
+      purchaseOption.sizeOptions?.length > 0 && selectedSize
+        ? getVariantIDBySize(selectedSize)
+        : purchaseOption.changes[0].variantID;
+
+    if (!variantID) {
+      throw new Error("Invalid product or missing variant ID.");
+    }
+
+    const validChanges = [
+      {
+        type: "add_variant",
+        variantID,
+        quantity,
+        discount: {
+          value: 15,
+          valueType: "percentage",
+          title: "15% off",
+        },
+      },
+    ];
+
+    if (purchaseOption.includesShipping) {
+      validChanges.push({
+        type: "add_shipping_line",
+        price: 10,
+      });
+    }
+
+    if (validChanges.length === 0) {
+      throw new Error("No changes available to apply.");
+    }
 
     const token = await fetch(`${APP_URL}/api/sign-changeset`, {
       method: "POST",
@@ -98,16 +138,13 @@ export function App() {
       },
       body: JSON.stringify({
         referenceId: inputData.initialPurchase.referenceId,
-        quantity,
-        changes: purchaseOption.id,
+        changes: validChanges,
       }),
     })
       .then((response) => response.json())
-      .then((response) => response.token)
-      .catch((e) => console.log(e));
+      .then((response) => response.token);
 
-    // Make a request to Shopify servers to apply the changeset.
-    const applyChangesetResult = await applyChangeset(token);
+    await applyChangeset(token);
 
     done();
   }
@@ -226,8 +263,8 @@ export function App() {
                 options={[
                   { label: "Choose size", value: "", disabled: true },
                   ...purchaseOption.sizeOptions.map((size) => ({
-                    label: size,
-                    value: size,
+                    label: size.size,
+                    value: size.size,
                   })),
                 ]}
               />

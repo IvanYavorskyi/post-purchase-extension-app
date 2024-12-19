@@ -18,6 +18,19 @@ export async function getOffer(accessToken, shopName) {
                             name
                             values
                           }
+                          variants(first: 10) {
+                            edges {
+                              node {
+                                id
+                                title
+                                price
+                                selectedOptions {
+                                  name
+                                  value
+                                }
+                              }
+                            }
+                          }
                       }
                       title
                       price
@@ -46,9 +59,18 @@ export async function getOffer(accessToken, shopName) {
 
   const variantID = variantNode.id.split("/")[4];
 
-  const sizeOptions = variantNode.product?.options?.find(
-    (option) => option.name.toLowerCase() === "size",
-  );
+
+  const sizeVariants =
+    variantNode.product?.variants?.edges
+      ?.filter(({ node }) =>
+        node.selectedOptions.some((option) => option.name === "Size"),
+      )
+      ?.map(({ node }) => ({
+        size: node.selectedOptions.find((option) => option.name === "Size")
+          ?.value,
+        variantID: node.id.split("/").pop(),
+      })) || [];
+
   const offer = {
     id: parseInt(variantID, 10),
     title: "One time offer",
@@ -59,7 +81,7 @@ export async function getOffer(accessToken, shopName) {
       variantNode.product.description || "some random description",
     originalPrice: variantNode.price,
     discountedPrice: variantNode.price,
-    sizeOptions: sizeOptions?.values || [],
+    sizeOptions: sizeVariants,
     changes: [
       {
         type: "add_variant",
@@ -115,6 +137,19 @@ export async function getSelectedOffer(offerId, accessToken, shopName) {
               name
               values
             }
+            variants(first: 10) {
+              edges {
+                node {
+                  id
+                  title
+                  price
+                  selectedOptions {
+                    name
+                    value
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -128,9 +163,16 @@ export async function getSelectedOffer(offerId, accessToken, shopName) {
 
     const product = response.data.productVariant;
 
-    const sizeOptions = product.product?.options?.find(
-      (option) => option.name.toLowerCase() === "size",
-    );
+    const sizeVariants =
+      product.product?.variants?.edges
+        ?.filter(({ node }) =>
+          node.selectedOptions.some((option) => option.name === "Size"),
+        )
+        ?.map(({ node }) => ({
+          size: node.selectedOptions.find((option) => option.name === "Size")
+            ?.value,
+          variantID: node.id.split("/").pop(),
+        })) || [];
 
     return {
       id: parseInt(product.id.split("/").pop(), 10),
@@ -142,7 +184,7 @@ export async function getSelectedOffer(offerId, accessToken, shopName) {
       ],
       originalPrice: product.price,
       discountedPrice: (product.price * 0.85).toFixed(2), // Assuming 15% off
-      sizeOptions: sizeOptions?.values || [],
+      sizeOptions: sizeVariants,
       changes: [
         {
           type: "add_variant",

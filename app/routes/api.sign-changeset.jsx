@@ -20,11 +20,10 @@ export const action = async ({ request }) => {
   });
 
   const body = await request.json();
-
-  const { changes, quantity = 1, referenceId } = body;
+  const { changes, referenceId } = body;
 
   const selectedOffer = await getSelectedOffer(
-    changes,
+    changes[0].variantID,
     session.accessToken,
     shop,
   );
@@ -33,9 +32,19 @@ export const action = async ({ request }) => {
     return cors(json({ error: "Offer not found" }, { status: 404 }));
   }
 
-  const updatedChanges = selectedOffer.changes.map((change) =>
-    change.type === "add_variant" ? { ...change, quantity } : change,
-  );
+  const updatedChanges = changes.map((change) => {
+    if (change.type === "add_variant") {
+      const { size, ...validChange } = change;
+      return validChange;
+    }
+
+    if (change.type === "add_shipping_line") {
+      const { variantID, quantity, ...shippingChange } = change;
+      return shippingChange;
+    }
+
+    return change;
+  });
 
   const payload = {
     iss: process.env.SHOPIFY_API_KEY,
