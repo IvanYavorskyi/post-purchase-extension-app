@@ -36,11 +36,8 @@ extend(
       }),
     }).then((response) => response.json());
 
-    // TODO console postpurchase.offer
-    // change quantity from state. will be 1 by default.
     await storage.update(postPurchaseOffer);
 
-    // For local development, always show the post-purchase page
     return { render: true };
   },
 );
@@ -62,7 +59,6 @@ export function App() {
 
   const purchaseOption = offer;
 
-  // Define the changes that you want to make to the purchase, including the discount to the product.
   useEffect(() => {
     async function calculatePurchase() {
       // Call Shopify to calculate the new price of the purchase, if the above changes are applied.
@@ -78,7 +74,6 @@ export function App() {
     calculatePurchase();
   }, [calculateChangeset, purchaseOption.changes, quantity]);
 
-  // Extract values from the calculated purchase.
   const shipping =
     calculatedPurchase?.addedShippingLines[0]?.priceSet?.presentmentMoney
       ?.amount;
@@ -96,7 +91,6 @@ export function App() {
   async function acceptOffer() {
     setLoading(true);
 
-    // Make a request to your app server to sign the changeset with your app's API secret key.
     const token = await fetch(`${APP_URL}/api/sign-changeset`, {
       method: "POST",
       headers: {
@@ -116,13 +110,11 @@ export function App() {
     // Make a request to Shopify servers to apply the changeset.
     const applyChangesetResult = await applyChangeset(token);
 
-    // Redirect to the thank-you page.
     done();
   }
 
   function declineOffer() {
     setLoading(true);
-    // Redirect to the thank-you page
     done();
   }
 
@@ -223,26 +215,25 @@ export function App() {
             />
           </TextContainer>
 
-          {/* TODO size selection */}
-          {/* {purchaseOption.productOptions?.length > 0 && (
-              <TextContainer>
-                <Text size="medium" emphasized>
-                  Select Size:
-                </Text>
-                <Select
-                  label="Size"
-                  value={selectedSize}
-                  onChange={setSelectedSize} // Direct state update
-                  options={[
-                    { label: "Choose size", value: "", disabled: true },
-                    ...purchaseOption.productOptions[0].values.map((size) => ({
-                      label: size,
-                      value: size,
-                    })),
-                  ]}
-                />
-              </TextContainer>
-            )} */}
+          {purchaseOption.sizeOptions?.length > 0 && (
+            <TextContainer>
+              <Text size="medium" emphasized>
+                Select Size:
+              </Text>
+              <Select
+                label="Size"
+                value={selectedSize}
+                onChange={setSelectedSize}
+                options={[
+                  { label: "Choose size", value: "", disabled: true },
+                  ...purchaseOption.sizeOptions.map((size) => ({
+                    label: size,
+                    value: size,
+                  })),
+                ]}
+              />
+            </TextContainer>
+          )}
 
           {/* Action Buttons */}
           <InlineStack>
