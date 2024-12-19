@@ -74,16 +74,16 @@ export function App() {
   }, [calculateChangeset, purchaseOption.changes, quantity]);
 
   const shipping =
-    calculatedPurchase?.addedShippingLines[0]?.priceSet?.presentmentMoney
-      ?.amount;
+    (calculatedPurchase?.addedShippingLines[0]?.priceSet?.presentmentMoney
+      ?.amount || 0) * quantity;
   const taxes =
     calculatedPurchase?.addedTaxLines[0]?.priceSet?.presentmentMoney?.amount;
   const total =
     (calculatedPurchase?.totalOutstandingSet.presentmentMoney.amount || 0) *
     quantity;
   const discountedPrice =
-    calculatedPurchase?.updatedLineItems[0].totalPriceSet.presentmentMoney
-      .amount;
+    (calculatedPurchase?.updatedLineItems[0].totalPriceSet.presentmentMoney
+      .amount || 0) * quantity;
   const originalPrice =
     calculatedPurchase?.updatedLineItems[0].priceSet.presentmentMoney.amount;
 
@@ -236,19 +236,43 @@ export function App() {
             <Text size="medium" emphasized>
               Quantity:
             </Text>
-            {/* TODO update to not use select */}
-            <Select
-              label="Quantity"
-              value={String(quantity)}
-              onChange={(value) => setQuantity(Number(value))}
-              options={[
-                { label: "1", value: "1" },
-                { label: "2", value: "2" },
-                { label: "3", value: "3" },
-                { label: "4", value: "4" },
-                { label: "5", value: "5" },
-              ]}
-            />
+
+            <InlineStack spacing="tight" inlineAlignment="center">
+              {/* Decrement Button */}
+              <Button
+                disabled={quantity <= 1}
+                onPress={() => setQuantity((prev) => Math.max(prev - 1, 1))}
+                appearance="secondary"
+                monochrome
+                accessibilityLabel="Decrease quantity"
+              >
+                -
+              </Button>
+
+              {/* Quantity Display */}
+              <BlockStack
+                spacing="none"
+                border="base"
+                padding="tight"
+                inlineAlignment="center"
+                accessibilityLabel={`Quantity: ${quantity}`}
+                width="extraSmall"
+              >
+                <Text size="medium" alignment="center" emphasized>
+                  {quantity}
+                </Text>
+              </BlockStack>
+
+              {/* Increment Button */}
+              <Button
+                onPress={() => setQuantity((prev) => prev + 1)}
+                appearance="secondary"
+                monochrome
+                accessibilityLabel="Increase quantity"
+              >
+                +
+              </Button>
+            </InlineStack>
           </TextContainer>
 
           {purchaseOption.sizeOptions?.length > 0 && (
