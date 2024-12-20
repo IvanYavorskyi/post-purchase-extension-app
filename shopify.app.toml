@@ -1,14 +1,14 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "406becb10283a48edfb5eee4f25e749f"
-application_url = "https://integrating-comp-isaac-remix.trycloudflare.com"
+application_url = "https://walked-configuration-ultram-documents.trycloudflare.com"
 embedded = true
 name = "post-checkout-ext"
 handle = "post-checkout-ext-2"
 
 [build]
 automatically_update_urls_on_dev = true
-dev_store_url = "post-purchase-extension-test-v3-0.myshopify.com"
+dev_store_url = "post-purchase-extension-test-v5-0.myshopify.com"
 include_config_on_deploy = true
 
 [webhooks]
@@ -16,7 +16,7 @@ api_version = "2024-10"
 
   [[webhooks.subscriptions]]
   topics = [ "app/uninstalled" ]
-  uri = "/webhooks/app/uninstalled"
+  uri = "/webhooks"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
@@ -24,9 +24,9 @@ scopes = "read_checkouts,read_orders,read_products,write_checkouts,write_orders,
 
 [auth]
 redirect_urls = [
-  "https://integrating-comp-isaac-remix.trycloudflare.com/auth/callback",
-  "https://integrating-comp-isaac-remix.trycloudflare.com/auth/shopify/callback",
-  "https://integrating-comp-isaac-remix.trycloudflare.com/api/auth/callback"
+  "https://walked-configuration-ultram-documents.trycloudflare.com/auth/callback",
+  "https://walked-configuration-ultram-documents.trycloudflare.com/auth/shopify/callback",
+  "https://walked-configuration-ultram-documents.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
