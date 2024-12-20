@@ -63,7 +63,6 @@ export function App() {
       // Call Shopify to calculate the new price of the purchase, if the above changes are applied.
       const result = await calculateChangeset({
         changes: purchaseOption.changes,
-        quantity,
       });
 
       setCalculatedPurchase(result.calculatedPurchase);
@@ -74,13 +73,14 @@ export function App() {
   }, [calculateChangeset, purchaseOption.changes, quantity]);
 
   const shipping =
-    (calculatedPurchase?.addedShippingLines[0]?.priceSet?.presentmentMoney
-      ?.amount || 0) * quantity;
+    calculatedPurchase?.addedShippingLines[0]?.priceSet?.presentmentMoney
+      ?.amount;
   const taxes =
     calculatedPurchase?.addedTaxLines[0]?.priceSet?.presentmentMoney?.amount;
   const total =
     (calculatedPurchase?.totalOutstandingSet.presentmentMoney.amount || 0) *
-    quantity;
+      quantity -
+    shipping * (quantity - 1 ? 1 : quantity - 1);
   const discountedPrice =
     (calculatedPurchase?.updatedLineItems[0].totalPriceSet.presentmentMoney
       .amount || 0) * quantity;
@@ -120,12 +120,11 @@ export function App() {
       },
     ];
 
-    if (purchaseOption.includesShipping) {
-      validChanges.push({
-        type: "add_shipping_line",
-        price: 0,
-      });
-    }
+    validChanges.push({
+      type: "add_shipping_line",
+      price: 10,
+      title: "Standard Shipping",
+    });
 
     if (validChanges.length === 0) {
       throw new Error("No changes available to apply.");
